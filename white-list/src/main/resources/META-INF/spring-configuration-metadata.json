@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "io.lvdaxian.whilelist.intercept",
+      "type": "java.lang.String",
+      "description": "whitelist interception address",
+      "defaultValue": ""
+    }
+  ]
+}
