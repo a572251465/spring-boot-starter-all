@@ -13,8 +13,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface DoWhiteList {
-  String key() default "";
+  String filterKey() default "";
   
-  // 白名单拦截 从而返回的 json
-  String returnJson() default "";
+  // 降级的方法
+  Class<?> fallback();
 }
