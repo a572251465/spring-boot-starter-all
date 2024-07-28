@@ -3,11 +3,9 @@ package io.lvdaxian.middleware.whilelist.test.controller;
 import io.lvdaxian.middleware.whilelist.check.annotation.DoWhiteList;
 import io.lvdaxian.middleware.whilelist.test.entity.UserInfo;
 import io.lvdaxian.middleware.whilelist.test.fallback.WhitelistFallbackFactory;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
@@ -20,4 +18,17 @@ public class UserController {
   public UserInfo queryUserInfo(@PathVariable("name") String name) {
     return UserInfo.builder().id(String.valueOf(count.decrementAndGet())).name(name).build();
   }
+  
+  @PostMapping("/api/queryUserInfo01")
+  @DoWhiteList(filterKey = "name", fallback = WhitelistFallbackFactory.class)
+  public UserInfo queryUserInfo01(@RequestBody UserInfo info) {
+    return info;
+  }
+  
+  @PostMapping("/api/queryUserInfo02")
+  @DoWhiteList(filterKey = "name", fallback = WhitelistFallbackFactory.class)
+  public UserInfo queryUserInfo02(@RequestBody Map<String, String> map) {
+    return UserInfo.builder().id(map.get("id")).name(map.get("name")).build();
+  }
+  
 }
