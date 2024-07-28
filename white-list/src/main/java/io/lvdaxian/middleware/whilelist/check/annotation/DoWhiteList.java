@@ -19,5 +19,5 @@ public @interface DoWhiteList {
   boolean isWhiteList() default true;
   
   // 降级的方法
-  Class<?> fallback();
+  Class<?> fallback() default Void.class;
 }

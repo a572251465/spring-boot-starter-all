@@ -1,7 +1,9 @@
 package io.lvdaxian.middleware.whilelist.check;
 
 import io.lvdaxian.middleware.whilelist.check.annotation.DoWhiteList;
-import io.lvdaxian.middleware.whilelist.check.exception.InvalidFallbackException;
+import io.lvdaxian.middleware.whilelist.check.context.WhitelistApplicationContext;
+import io.lvdaxian.middleware.whilelist.check.exception.GlobalUniqueFallbackException;
+import io.lvdaxian.middleware.whilelist.check.exception.NotFoundFallbackException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -15,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Method;
-import java.util.function.Supplier;
 
 /**
  * 切面 逻辑实现
@@ -28,6 +29,8 @@ public class DoJoinPoint {
   private static final Logger log = LoggerFactory.getLogger(DoJoinPoint.class);
   @Resource
   private String whileListConfig;
+  @Resource(name = "whitelistContext")
+  private WhitelistApplicationContext whitelistContext;
   
   /**
    * 定义 拦截的注解
@@ -98,6 +101,23 @@ public class DoJoinPoint {
   }
   
   /**
+   * 通过 接口从bean中 获取实现类
+   *
+   * @return 返回 Class
+   * @author lihh
+   */
+  private Class<?> getClassByInterface() throws GlobalUniqueFallbackException {
+    String[] beanNames = whitelistContext.getContext().getBeanNamesForType(FallbackProcessor.class);
+    // 表示 全局实现有多个实现 FallbackProcessor 的类
+    if (beanNames.length > 1)
+      throw new GlobalUniqueFallbackException("Global FallbackProcessor.class instantiated bean is not unique");
+    if (beanNames.length == 0)
+      return null;
+    
+    return whitelistContext.getContext().getBean(beanNames[0], FallbackProcessor.class).getClass();
+  }
+  
+  /**
    * 获取 返回对象
    *
    * @param whiteList 白名单注解
@@ -105,19 +125,22 @@ public class DoJoinPoint {
    * @return 返回的对象值
    * @author lihh
    */
-  private Object returnObject(DoWhiteList whiteList, Method method) throws InstantiationException, IllegalAccessException, InvalidFallbackException {
+  private Object returnObject(DoWhiteList whiteList, Method method) throws InstantiationException, IllegalAccessException, GlobalUniqueFallbackException, NotFoundFallbackException {
     // 返回类型
     Class<?> returnType = method.getReturnType();
-    // 表示 降级的对象
+    // 表示 降级的对象  首先从注解中获取
     Class<?> fallbackClass = whiteList.fallback();
+    // 判断实现类  是否实现接口
+    if (!FallbackProcessor.class.isAssignableFrom(fallbackClass))
+      // 从全局中 拿
+      fallbackClass = getClassByInterface();
     
-    // 判断 是否实现了Supplier
-    if (!Supplier.class.isAssignableFrom(fallbackClass))
-      throw new InvalidFallbackException("the fallback class must be implemented by " + Supplier.class.getName());
+    if (fallbackClass == null)
+      throw new NotFoundFallbackException("local or global must be implemented FallbackProcessor.class");
     
     // 通过类 拿到实例
     Object instance = fallbackClass.newInstance();
-    Object returnObj = ((Supplier<?>) instance).get();
+    Object returnObj = ((FallbackProcessor<?>) instance).handle();
     // 如果为空的话 直接实例化对象
     if (null == returnObj || "".equals(returnObj))
       return returnType.newInstance();
