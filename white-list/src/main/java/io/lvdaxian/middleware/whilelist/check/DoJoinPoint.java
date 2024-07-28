@@ -12,7 +12,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Method;
@@ -23,7 +22,6 @@ import java.util.function.Supplier;
  *
  * @author lihh
  */
-@Component
 @Aspect
 public class DoJoinPoint {
   
@@ -64,10 +62,23 @@ public class DoJoinPoint {
     
     // 过滤名称的 value值
     String[] filterNameValues = whileListConfig.split(",");
+    // 判断是 白名单 还是 黑名单, 白名单 默认是 false
+    boolean isWhiteList = whiteList.isWhiteList();
     
+    boolean assignValueExist = false;
     for (String name : filterNameValues)
-      if (filterValue.equals(name))
-        return jp.proceed();
+      if (filterValue.equals(name)) {
+        assignValueExist = true;
+        break;
+      }
+    
+    // isWhiteList == true && assignValueExist == true 表示白名单，指定的值存在 表示可以执行下一步
+    // isWhiteList == false && assignValueExist == false 表示黑名单，指定的值不存在，表示可以执行下一步
+    if (isWhiteList) {
+      if (assignValueExist) return jp.proceed();
+    } else {
+      if (!assignValueExist) return jp.proceed();
+    }
     
     // 拦截
     return returnObject(whiteList, method);

@@ -15,6 +15,9 @@ import java.lang.annotation.Target;
 public @interface DoWhiteList {
   String filterKey() default "";
   
+  // 默认是白名单 反之 是黑名单
+  boolean isWhiteList() default true;
+  
   // 降级的方法
   Class<?> fallback();
 }

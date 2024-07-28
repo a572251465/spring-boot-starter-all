@@ -1,0 +1,6 @@
+server:
+  port: 9111
+io:
+  lvdaxian:
+    whilelist:
+      intercept: aaa
