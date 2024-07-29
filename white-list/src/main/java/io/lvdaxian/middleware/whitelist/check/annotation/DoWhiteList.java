@@ -1,4 +1,4 @@
-package io.lvdaxian.middleware.whilelist.check.annotation;
+package io.lvdaxian.middleware.whitelist.check.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

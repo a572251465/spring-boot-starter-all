@@ -1,4 +1,4 @@
-package io.lvdaxian.middleware.whilelist.check.config;
+package io.lvdaxian.middleware.whitelist.check.config;
 
 import lombok.Getter;
 import lombok.Setter;

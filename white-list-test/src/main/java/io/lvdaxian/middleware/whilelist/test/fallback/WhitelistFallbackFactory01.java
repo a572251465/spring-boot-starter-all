@@ -1,6 +1,6 @@
 package io.lvdaxian.middleware.whilelist.test.fallback;
 
-import io.lvdaxian.middleware.whilelist.check.FallbackProcessor;
+import io.lvdaxian.middleware.whitelist.check.FallbackProcessor;
 import io.lvdaxian.middleware.whilelist.test.entity.UserInfo;
 import org.springframework.stereotype.Component;
 

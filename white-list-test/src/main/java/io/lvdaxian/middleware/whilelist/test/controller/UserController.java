@@ -1,6 +1,6 @@
 package io.lvdaxian.middleware.whilelist.test.controller;
 
-import io.lvdaxian.middleware.whilelist.check.annotation.DoWhiteList;
+import io.lvdaxian.middleware.whitelist.check.annotation.DoWhiteList;
 import io.lvdaxian.middleware.whilelist.test.entity.UserInfo;
 import io.lvdaxian.middleware.whilelist.test.fallback.WhitelistFallbackFactory;
 import org.springframework.web.bind.annotation.*;

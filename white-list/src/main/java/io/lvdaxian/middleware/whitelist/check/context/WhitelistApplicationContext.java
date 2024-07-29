@@ -1,4 +1,4 @@
-package io.lvdaxian.middleware.whilelist.check.context;
+package io.lvdaxian.middleware.whitelist.check.context;
 
 import lombok.Getter;
 import org.springframework.beans.BeansException;

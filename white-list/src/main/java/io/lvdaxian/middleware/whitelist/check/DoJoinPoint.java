@@ -1,9 +1,9 @@
-package io.lvdaxian.middleware.whilelist.check;
+package io.lvdaxian.middleware.whitelist.check;
 
-import io.lvdaxian.middleware.whilelist.check.annotation.DoWhiteList;
-import io.lvdaxian.middleware.whilelist.check.context.WhitelistApplicationContext;
-import io.lvdaxian.middleware.whilelist.check.exception.GlobalUniqueFallbackException;
-import io.lvdaxian.middleware.whilelist.check.exception.NotFoundFallbackException;
+import io.lvdaxian.middleware.whitelist.check.annotation.DoWhiteList;
+import io.lvdaxian.middleware.whitelist.check.context.WhitelistApplicationContext;
+import io.lvdaxian.middleware.whitelist.check.exception.GlobalUniqueFallbackException;
+import io.lvdaxian.middleware.whitelist.check.exception.NotFoundFallbackException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -37,7 +37,7 @@ public class DoJoinPoint {
    *
    * @author lihh
    */
-  @Pointcut("@annotation(io.lvdaxian.middleware.whilelist.check.annotation.DoWhiteList)")
+  @Pointcut("@annotation(io.lvdaxian.middleware.whitelist.check.annotation.DoWhiteList)")
   public void aopPoint() {
   }
   

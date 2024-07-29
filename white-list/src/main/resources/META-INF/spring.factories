@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=io.lvdaxian.middleware.whilelist.check.config.WhiteListAutoConfigure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=io.lvdaxian.middleware.whitelist.check.config.WhiteListAutoConfigure

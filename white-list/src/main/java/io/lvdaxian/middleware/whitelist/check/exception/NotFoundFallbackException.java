@@ -1,4 +1,4 @@
-package io.lvdaxian.middleware.whilelist.check.exception;
+package io.lvdaxian.middleware.whitelist.check.exception;
 
 public class NotFoundFallbackException extends Exception {
   public NotFoundFallbackException(String message) {
