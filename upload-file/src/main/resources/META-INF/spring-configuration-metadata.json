@@ -1,0 +1,22 @@
+{
+  "properties": [
+    {
+      "name": "io.lvdaxian.upload.file.enabledType",
+      "type": "java.lang.String",
+      "description": "file saving type",
+      "defaultValue": "disk"
+    },
+    {
+      "name": "io.lvdaxian.upload.file.saveDir",
+      "type": "java.lang.String",
+      "description": "when enabled.type is file, please input save.dir",
+      "defaultValue": "./uploadFileSaveDir"
+    },
+    {
+      "name": "io.lvdaxian.upload.file.httpInterceptorOrder",
+      "type": "java.lang.Integer",
+      "description": "setting http interceptor order",
+      "defaultValue": "10"
+    }
+  ]
+}

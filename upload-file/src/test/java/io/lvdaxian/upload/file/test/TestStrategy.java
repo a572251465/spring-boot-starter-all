@@ -14,7 +14,7 @@ public class TestStrategy {
     request.setRequestURI("/upload/verify/aaabb");
     
     SelectStrategy selectStrategy = DefaultSelectStrategyAdapter.INSTANCE.newSelectStrategy(request);
-    selectStrategy.accept(null);
+    selectStrategy.accept(null, null, null);
   }
   
   @Test
@@ -24,7 +24,7 @@ public class TestStrategy {
     request.setRequestURI("/upload/section/aaabb/dsdf11.txt_1");
     
     SelectStrategy selectStrategy = DefaultSelectStrategyAdapter.INSTANCE.newSelectStrategy(request);
-    selectStrategy.accept(null);
+    selectStrategy.accept(null, null, null);
   }
   
   @Test
@@ -34,6 +34,6 @@ public class TestStrategy {
     request.setRequestURI("/upload/test/aa");
     
     SelectStrategy selectStrategy = DefaultSelectStrategyAdapter.INSTANCE.newSelectStrategy(request);
-    selectStrategy.accept(null);
+    selectStrategy.accept(null, null, null);
   }
 }

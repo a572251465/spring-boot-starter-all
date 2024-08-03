@@ -1,7 +1,11 @@
 package io.lvdaxian.upload.file.strategy;
 
-import javax.servlet.http.HttpServletResponse;
-import java.util.function.Consumer;
+import io.lvdaxian.upload.file.extend.FileOperate;
+import io.lvdaxian.upload.file.functional.ConsumerP;
 
-public interface SelectStrategy extends Consumer<HttpServletResponse> {
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public interface SelectStrategy extends ConsumerP<HttpServletRequest, HttpServletResponse, FileOperate> {
+
 }
