@@ -9,6 +9,7 @@ import io.lvdaxian.upload.file.strategy.impl.ListStrategyImpl;
 import io.lvdaxian.upload.file.strategy.impl.MergeStrategyImpl;
 import io.lvdaxian.upload.file.strategy.impl.SectionStrategyImpl;
 import io.lvdaxian.upload.file.strategy.impl.VerifyStrategyImpl;
+import io.lvdaxian.upload.file.utils.Constants;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class DefaultSelectStrategyFactory extends AbstractSelectStrategyFactory 
         RequestMatchEntity.builder()
             .method(RequestEnum.POST)
             .isMatch(true)
-            .requestUrl(addPrefix(String.format("/section/%s/%s", fileNameRegex, fileNameRegex)))
+            .requestUrl(Constants.REQUEST_URL.SECTION_REQUEST_URL)
             .build(),
         new SectionStrategyImpl()
     );

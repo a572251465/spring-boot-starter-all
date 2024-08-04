@@ -2,9 +2,9 @@ package io.lvdaxian.upload.file.strategy.impl;
 
 import io.lvdaxian.upload.file.extend.FileOperate;
 import io.lvdaxian.upload.file.strategy.SelectStrategy;
+import io.lvdaxian.upload.file.utils.result.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * 文件 merge 策略实现
@@ -13,7 +13,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class MergeStrategyImpl implements SelectStrategy {
   @Override
-  public void accept(HttpServletRequest req, HttpServletResponse res, FileOperate fileOperate) {
+  public ResponseEntity accept(HttpServletRequest req, FileOperate fileOperate) {
     System.out.println("merge");
+    return null;
   }
 }

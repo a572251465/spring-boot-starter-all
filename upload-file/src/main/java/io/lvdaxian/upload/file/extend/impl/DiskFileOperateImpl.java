@@ -3,15 +3,14 @@ package io.lvdaxian.upload.file.extend.impl;
 import io.lvdaxian.upload.file.extend.FileOperate;
 import io.lvdaxian.upload.file.utils.result.ResponseEntity;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+@Component
 @ConditionalOnProperty(
-    prefix = "io.lvdaxian.upload.file",
-    name = "enabledType",
+    name = "io.lvdaxian.upload.file.enabledType",
     havingValue = "disk"
 )
-@Configuration
 public class DiskFileOperateImpl implements FileOperate {
   
   @Override

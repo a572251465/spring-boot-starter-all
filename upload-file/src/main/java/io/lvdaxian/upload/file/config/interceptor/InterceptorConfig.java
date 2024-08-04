@@ -22,6 +22,9 @@ public class InterceptorConfig implements WebMvcConfigurer {
   
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(createRequestInterceptor()).addPathPatterns("/upload/**").order(properties.getHttpInterceptorOrder());
+    int httpInterceptorOrder = properties.getHttpInterceptorOrder();
+    httpInterceptorOrder = httpInterceptorOrder == 0 ? 10 : httpInterceptorOrder;
+    
+    registry.addInterceptor(createRequestInterceptor()).addPathPatterns("/upload/**").order(httpInterceptorOrder);
   }
 }
