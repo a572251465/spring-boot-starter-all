@@ -5,10 +5,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +30,18 @@ public class CommonUtils {
       return objectSet.isEmpty() ? null : objectSet;
     }
     return null;
+  }
+  
+  /**
+   * 根据 相对路径 获取 绝对路径
+   *
+   * @param relativePath 相对路径
+   * @return 绝对路径
+   * @author lihh
+   */
+  public static Path getAbsolutePath(String relativePath) {
+    Path path = Paths.get(relativePath);
+    return path.toAbsolutePath();
   }
   
   /**

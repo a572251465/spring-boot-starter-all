@@ -1,5 +1,7 @@
 package io.lvdaxian.upload.file.utils;
 
+import cn.hutool.core.util.StrUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,13 +28,24 @@ public class FileUtils {
   }
   
   /**
+   * 获取文件地址
+   *
+   * @param realPath 真实路径
+   * @return 返回判断后的路径
+   * @author lihh
+   */
+  public static String getFileRealPath(String realPath) {
+    return StrUtil.isEmpty(realPath) ? Constants.fileSaveTmpDir : realPath;
+  }
+  
+  /**
    * 写文件的事件
    *
    * @param outputFilePath 输出的文件地址
    * @param inputStream    输入流
    * @author lihh
    */
-  private static void writeFile(String outputFilePath, InputStream inputStream) {
+  public static void writeFile(String outputFilePath, InputStream inputStream) {
     try {
       OutputStream outputStream = Files.newOutputStream(Paths.get(outputFilePath));
       
@@ -56,7 +69,7 @@ public class FileUtils {
    * @param outputFilePath 合并文件路径
    * @author lihh
    */
-  private static boolean mergeFile(File[] files, String outputFilePath) throws IOException {
+  public static boolean mergeFile(File[] files, String outputFilePath) throws IOException {
     // 实例化 出力文件流
     // 使用APPEND选项打开或创建文件，并创建追加模式的输出流
     OutputStream outputStream = Files.newOutputStream(Paths.get(outputFilePath), StandardOpenOption.CREATE, StandardOpenOption.APPEND);

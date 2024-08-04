@@ -23,17 +23,6 @@ import java.util.regex.Pattern;
  */
 public class DefaultSelectStrategyFactory extends AbstractSelectStrategyFactory implements SelectStrategyFactory {
   
-  /**
-   * 添加 前缀的方法
-   *
-   * @param path 访问的URL
-   * @return 返回最终 path
-   * @author lihh
-   */
-  private String addPrefix(String path) {
-    return "/upload" + path;
-  }
-  
   // 表示 默认的工厂实例
   public static DefaultSelectStrategyFactory INSTANCE = new DefaultSelectStrategyFactory();
   
@@ -44,8 +33,6 @@ public class DefaultSelectStrategyFactory extends AbstractSelectStrategyFactory 
    */
   public void register() {
     // 表示 文件名称 正则
-    String fileNameRegex = "[A-Za-z0-9]+(.[A-Za-z0-9]+_\\d)?";
-    
     INSTANCE.register(
         RequestMatchEntity.builder()
             .method(RequestEnum.POST)
@@ -59,7 +46,7 @@ public class DefaultSelectStrategyFactory extends AbstractSelectStrategyFactory 
         RequestMatchEntity.builder()
             .isMatch(true)
             .method(RequestEnum.GET)
-            .requestUrl(addPrefix(String.format("/verify/%s", fileNameRegex)))
+            .requestUrl(Constants.REQUEST_URL.VERIFY_REQUEST_URL)
             .build(),
         new VerifyStrategyImpl()
     );
@@ -68,7 +55,7 @@ public class DefaultSelectStrategyFactory extends AbstractSelectStrategyFactory 
         RequestMatchEntity.builder()
             .isMatch(true)
             .method(RequestEnum.GET)
-            .requestUrl(addPrefix(String.format("/list/%s", fileNameRegex)))
+            .requestUrl(Constants.REQUEST_URL.LIST_REQUEST_URL)
             .build(),
         new ListStrategyImpl()
     );
@@ -77,7 +64,7 @@ public class DefaultSelectStrategyFactory extends AbstractSelectStrategyFactory 
         RequestMatchEntity.builder()
             .isMatch(true)
             .method(RequestEnum.GET)
-            .requestUrl(String.format(addPrefix("/merge/%s/%s"), fileNameRegex, fileNameRegex))
+            .requestUrl(Constants.REQUEST_URL.MERGE_REQUEST_URL)
             .build(),
         new MergeStrategyImpl()
     );
