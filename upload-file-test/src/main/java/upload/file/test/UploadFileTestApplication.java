@@ -1,13 +1,11 @@
-package io.lvdaxian.middleware.whilelist.test;
+package upload.file.test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import javax.servlet.http.HttpServletResponse;
-
 @SpringBootApplication
-public class ApiTestApplication {
+public class UploadFileTestApplication {
   public static void main(String[] args) {
-    SpringApplication.run(ApiTestApplication.class, args);
+    SpringApplication.run(UploadFileTestApplication.class, args);
   }
 }
