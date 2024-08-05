@@ -16,9 +16,9 @@
   
   <dependencies>
     <dependency>
-      <groupId>io.lvdaxian</groupId>
+      <groupId>io.github.a572251465</groupId>
       <artifactId>upload-file-jdk-spring-boot-starter</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     
     <dependency>

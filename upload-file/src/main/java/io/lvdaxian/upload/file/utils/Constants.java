@@ -8,5 +8,7 @@ public class Constants {
     public final static String MERGE_REQUEST_URL = "/upload/merge/([A-Za-z0-9]+)/([A-Za-z0-9]+.[A-Za-z0-9]+)";
   }
   
+  // 表示保存的临时目录
   public final static String fileSaveTmpDir = "uploadFileTmpDir";
+  public final static String ENABLED_TYPE_DISK = "disk";
 }
