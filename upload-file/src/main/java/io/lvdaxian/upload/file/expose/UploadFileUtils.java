@@ -10,4 +10,5 @@ public interface UploadFileUtils {
   MultipartFile convertFileToMultipartFile(File file);
   
   MultipartFile getMultipartFileByName(String fileName);
+  File getFileByName(String fileName);
 }

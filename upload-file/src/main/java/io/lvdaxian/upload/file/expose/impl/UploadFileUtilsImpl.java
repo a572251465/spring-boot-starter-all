@@ -70,6 +70,19 @@ public class UploadFileUtilsImpl implements UploadFileUtils {
    */
   @Override
   public MultipartFile getMultipartFileByName(String fileName) {
+    // 将 file 进行转换
+    return convertFileToMultipartFile(getFileByName(fileName), fileName);
+  }
+  
+  /**
+   * 根据 文件名称 获取文件
+   *
+   * @param fileName 文件名称
+   * @return 返回的文件
+   * @author lihh
+   */
+  @Override
+  public File getFileByName(String fileName) {
     if (!StrUtil.equals(properties.getEnabledType(), Constants.ENABLED_TYPE_DISK))
       return null;
     
@@ -84,7 +97,6 @@ public class UploadFileUtilsImpl implements UploadFileUtils {
       throw new UploadFileNotFoundException(message);
     }
     
-    // 将 file 进行转换
-    return convertFileToMultipartFile(file, fileName);
+    return file;
   }
 }
