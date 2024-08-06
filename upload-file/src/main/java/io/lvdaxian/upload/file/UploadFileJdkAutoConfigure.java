@@ -16,8 +16,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnMissingBean({UploadFileFullProperties.class, UploadFileProperties.class})
 @ConditionalOnProperty(
     prefix = "io.lvdaxian.upload.file",
-    name = "enabled-type",
-    havingValue = "disk"
+    name = "enabled-type"
 )
 @Configuration
 @ComponentScan(basePackages = "io.lvdaxian.upload.file")
