@@ -1,8 +1,9 @@
 package io.lvdaxian.upload.file.extend.impl;
 
-import io.lvdaxian.upload.file.entity.UploadFileProperties;
+import io.lvdaxian.upload.file.entity.UploadFileFullProperties;
 import io.lvdaxian.upload.file.extend.FileOperate;
 import io.lvdaxian.upload.file.utils.CommonUtils;
+import io.lvdaxian.upload.file.utils.Constants;
 import io.lvdaxian.upload.file.utils.FileUtils;
 import io.lvdaxian.upload.file.utils.result.ResponseEntity;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,22 +21,18 @@ import java.util.Comparator;
 import java.util.Optional;
 
 @Component
-@ConditionalOnProperty(name = "io.lvdaxian.upload.file.enabledType", havingValue = "disk")
+@ConditionalOnProperty(name = "io.lvdaxian.upload.file.enabled-type", havingValue = "disk")
 public class DiskFileOperateImpl implements FileOperate {
   
-  // 表示临时目录
-  private static String tmpDir;
-  private static String publicDir;
-  
   @Resource
-  private UploadFileProperties properties;
+  private UploadFileFullProperties fullProperties;
   
   @PostConstruct
   public void postHandler() {
-    tmpDir = CommonUtils.getAbsolutePath(FileUtils.getFileRealPath(properties.getSaveDir())) + File.separator + "tmp";
-    publicDir = CommonUtils.getAbsolutePath(FileUtils.getFileRealPath(properties.getSaveDir())) + File.separator + "public";
     // 基础目录
-    String baseDir = CommonUtils.getAbsolutePath(FileUtils.getFileRealPath(properties.getSaveDir())) + "";
+    String baseDir = fullProperties.setBaseDir(CommonUtils.getAbsolutePath(fullProperties.getInnerProperties().getSaveDir()).toString());
+    String tmpDir = fullProperties.setTmpDir(baseDir + File.separator + Constants.CONST_TMP_NAME);
+    String publicDir = fullProperties.setPublicDir(baseDir + File.separator + Constants.CONST_PUBLIC_NAME);
     
     FileUtils.mkDir(baseDir);
     FileUtils.mkDir(tmpDir);
@@ -53,7 +50,7 @@ public class DiskFileOperateImpl implements FileOperate {
    */
   @Override
   public ResponseEntity upload(MultipartFile file, String baseDir, String filename) {
-    baseDir = tmpDir + File.separator + baseDir;
+    baseDir = fullProperties.getTmpDir() + File.separator + baseDir;
     
     // 创建基础目录
     FileUtils.mkDir(baseDir);
@@ -79,7 +76,7 @@ public class DiskFileOperateImpl implements FileOperate {
   @Override
   public ResponseEntity verify(String filename) {
     // 表示文件
-    File file = new File(publicDir + File.separator + filename);
+    File file = new File(fullProperties.getPublicDir() + File.separator + filename);
     return ResponseEntity.ok(file.isFile());
   }
   
@@ -93,7 +90,7 @@ public class DiskFileOperateImpl implements FileOperate {
   @Override
   public ResponseEntity list(String baseDir) {
     // 基础目录 file
-    File basePathFile = new File(tmpDir + File.separator + baseDir);
+    File basePathFile = new File(fullProperties.getTmpDir() + File.separator + baseDir);
     // 表示目录是否存在
     if (!basePathFile.isDirectory() || !basePathFile.exists())
       return ResponseEntity.ok(null);
@@ -119,15 +116,14 @@ public class DiskFileOperateImpl implements FileOperate {
    */
   @Override
   public ResponseEntity merge(String baseDir, String filename) {
-    baseDir = tmpDir + File.separator + baseDir;
+    baseDir = fullProperties.getTmpDir() + File.separator + baseDir;
     // 临时 基础目录
     File baseDirFile = new File(baseDir);
     
     // 读取目录
     File[] files = baseDirFile.listFiles();
     // 判断目录是否为空
-    if (files == null || files.length == 0)
-      return ResponseEntity.ok("");
+    if (files == null || files.length == 0) return ResponseEntity.ok("");
     
     // 为了防止文件顺序乱了 这里进行强制排序
     Arrays.sort(files, new Comparator<File>() {
@@ -140,7 +136,7 @@ public class DiskFileOperateImpl implements FileOperate {
     });
     
     // 表示合并后的目录
-    String mergePublicDir = publicDir + File.separator + filename;
+    String mergePublicDir = fullProperties.getPublicDir() + File.separator + filename;
     // 判断是否合并成功
     boolean mergeFlag = false;
     try {

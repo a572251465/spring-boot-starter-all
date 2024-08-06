@@ -1,5 +1,6 @@
 package io.lvdaxian.upload.file.utils;
 
+import cn.hutool.core.util.StrUtil;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
@@ -42,6 +43,28 @@ public class CommonUtils {
   public static Path getAbsolutePath(String relativePath) {
     Path path = Paths.get(relativePath);
     return path.toAbsolutePath();
+  }
+  
+  /**
+   * 拿到 共同的前缀 以及后缀
+   *
+   * @param str 传递的字符串
+   * @author lihh
+   */
+  public static String getCommonPrefixAndSuffix(String str) {
+    return String.format(" >>> upload file jdk: %s <<< ", str);
+  }
+  
+  /**
+   * 判断 str 是否为空，反之使用替换 str
+   *
+   * @param value        获取的值
+   * @param replaceValue 替换的值
+   * @return 最终的字符串
+   * @author lihh
+   */
+  public static String getValueOrDefault(String value, String replaceValue) {
+    return StrUtil.isEmpty(value) ? replaceValue : value;
   }
   
   /**

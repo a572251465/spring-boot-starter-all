@@ -1,14 +1,14 @@
 server:
   port: 9334
 
-
-io:
-  lvdaxian:
-    upload:
-      file:
-        enabledType: disk
 spring:
   servlet:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
+
+io:
+  lvdaxian:
+    upload:
+      file:
+        enabled-type: disk

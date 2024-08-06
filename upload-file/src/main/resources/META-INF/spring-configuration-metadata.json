@@ -1,19 +1,24 @@
 {
   "properties": [
     {
-      "name": "io.lvdaxian.upload.file.enabledType",
+      "name": "io.lvdaxian.upload.file.enabled-type",
       "type": "java.lang.String",
       "description": "file saving type"
     },
     {
-      "name": "io.lvdaxian.upload.file.saveDir",
+      "name": "io.lvdaxian.upload.file.save-dir",
       "type": "java.lang.String",
       "description": "when enabled.type is file, please input save.dir"
     },
     {
-      "name": "io.lvdaxian.upload.file.httpInterceptorOrder",
+      "name": "io.lvdaxian.upload.file.http-interceptor-order",
       "type": "java.lang.Integer",
       "description": "setting http interceptor order"
+    },
+    {
+      "name": "io.lvdaxian.upload.file.context-prefix",
+      "type": "java.lang.String",
+      "description": "context access prefix"
     }
   ]
 }

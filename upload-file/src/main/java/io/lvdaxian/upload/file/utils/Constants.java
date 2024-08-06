@@ -11,4 +11,8 @@ public class Constants {
   // 表示保存的临时目录
   public final static String fileSaveTmpDir = "uploadFileTmpDir";
   public final static String ENABLED_TYPE_DISK = "disk";
+  public final static String ENABLED_TYPE_MINO = "mino";
+  public final static int DEFAULT_INTERCEPTOR_ORDER = 10;
+  public final static String CONST_PUBLIC_NAME = "public";
+  public final static String CONST_TMP_NAME = "tmp";
 }

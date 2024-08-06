@@ -28,17 +28,6 @@ public class FileUtils {
   }
   
   /**
-   * 获取文件地址
-   *
-   * @param realPath 真实路径
-   * @return 返回判断后的路径
-   * @author lihh
-   */
-  public static String getFileRealPath(String realPath) {
-    return StrUtil.isEmpty(realPath) ? Constants.fileSaveTmpDir : realPath;
-  }
-  
-  /**
    * 写文件的事件
    *
    * @param outputFilePath 输出的文件地址

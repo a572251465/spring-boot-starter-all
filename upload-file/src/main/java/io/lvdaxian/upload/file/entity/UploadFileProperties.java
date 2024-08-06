@@ -9,4 +9,5 @@ public class UploadFileProperties {
   private String enabledType;
   private String saveDir;
   private int httpInterceptorOrder;
+  private String contextPrefix;
 }

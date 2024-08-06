@@ -1,9 +1,10 @@
 package io.lvdaxian.upload.file.interceptor;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import io.lvdaxian.upload.file.extend.FileOperate;
 import io.lvdaxian.upload.file.strategy.SelectStrategy;
 import io.lvdaxian.upload.file.strategy.impl.adapter.DefaultSelectStrategyAdapter;
+import io.lvdaxian.upload.file.utils.CommonUtils;
 import io.lvdaxian.upload.file.utils.result.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +36,11 @@ public class HttpRequestInterceptor implements HandlerInterceptor {
     SelectStrategy selectStrategy = DefaultSelectStrategyAdapter.INSTANCE.newSelectStrategy(request);
     if (null == selectStrategy)
       return HandlerInterceptor.super.preHandle(request, response, handler);
-    log.info("Intercepted request: {}", request.getRequestURI());
+    log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("Intercepted request: %s", request.getRequestURI())));
     
     // 从这里拿到策略开始执行
     ResponseEntity entity = selectStrategy.accept(request, fileOperate);
-    log.info("Intercepted request: {}, Result is: {}", request.getRequestURI(), JSON.toJSONString(entity));
+    log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("Intercepted request: %s, Result is: %s", request.getRequestURI(), JSON.toJSONString(entity))));
     // 设置响应的类型
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding(StandardCharsets.UTF_8.toString());

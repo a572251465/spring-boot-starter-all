@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.MultipartFile;
 
 @ConditionalOnProperty(
-    name = "io.lvdaxian.upload.file.enabledType",
-    havingValue = "Mino"
+    name = "io.lvdaxian.upload.file.enabled-type",
+    havingValue = "mino"
 )
 @ConditionalOnClass({MinioClient.class})
 @Configuration
