@@ -35,6 +35,9 @@ public class UploadFileFullProperties {
     }
     if (0 == properties.getHttpInterceptorOrder())
       this.innerProperties.setHttpInterceptorOrder(Constants.DEFAULT_INTERCEPTOR_ORDER);
+    
+    if (StrUtil.isEmpty(properties.getContextPrefix()))
+      this.innerProperties.setContextPrefix("");
   }
   
   public String setBaseDir(String baseDir) {
