@@ -40,7 +40,6 @@ public class HttpRequestInterceptor implements HandlerInterceptor {
     
     // 从这里拿到策略开始执行
     ResponseEntity entity = selectStrategy.accept(request, fileOperate);
-    log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("Intercepted request: %s, Result is: %s", request.getRequestURI(), JSON.toJSONString(entity))));
     // 设置响应的类型
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding(StandardCharsets.UTF_8.toString());

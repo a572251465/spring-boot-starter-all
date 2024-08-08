@@ -55,6 +55,17 @@ public class CommonUtils {
     return String.format(" >>> upload file jdk: %s <<< ", str);
   }
   
+  /***
+   * 表示解析的参数 从而返回字符串
+   *
+   * @author lihh
+   * @param str 打印的字符串
+   * @return 返回拼接字符串
+   */
+  public static String resolveRequestPathString(String str) {
+    return String.format("resolve request params: %s", str);
+  }
+  
   /**
    * 判断 str 是否为空，反之使用替换 str
    *
