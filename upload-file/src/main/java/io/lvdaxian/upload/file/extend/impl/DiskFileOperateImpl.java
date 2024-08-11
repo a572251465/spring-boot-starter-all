@@ -1,7 +1,11 @@
 package io.lvdaxian.upload.file.extend.impl;
 
+import cn.hutool.core.io.FileUtil;
 import io.lvdaxian.upload.file.entity.UploadFileFullProperties;
 import io.lvdaxian.upload.file.extend.FileOperate;
+import io.lvdaxian.upload.file.notify.NotifyCenter;
+import io.lvdaxian.upload.file.notify.entity.Event;
+import io.lvdaxian.upload.file.notify.enumeration.PublisherTypeEnum;
 import io.lvdaxian.upload.file.utils.CommonUtils;
 import io.lvdaxian.upload.file.utils.Constants;
 import io.lvdaxian.upload.file.utils.FileUtils;
@@ -14,10 +18,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Optional;
 
 @Component
@@ -33,10 +35,12 @@ public class DiskFileOperateImpl implements FileOperate {
     String baseDir = fullProperties.setBaseDir(CommonUtils.getAbsolutePath(fullProperties.getInnerProperties().getSaveDir()).toString());
     String tmpDir = fullProperties.setTmpDir(baseDir + File.separator + Constants.CONST_TMP_NAME);
     String publicDir = fullProperties.setPublicDir(baseDir + File.separator + Constants.CONST_PUBLIC_NAME);
+    String convertDir = fullProperties.setConvertDir(baseDir + File.separator + Constants.CONST_CONVERT_NAME);
     
     FileUtils.mkDir(baseDir);
     FileUtils.mkDir(tmpDir);
     FileUtils.mkDir(publicDir);
+    FileUtils.mkDir(convertDir);
   }
   
   /**
@@ -60,6 +64,13 @@ public class DiskFileOperateImpl implements FileOperate {
     // 将 文件 写入到磁盘中
     try {
       FileUtils.writeFile(filePath, file.getInputStream());
+      
+      if (!filename.startsWith("not_del_file")) {
+        String newFilename = filename.split("-")[0];
+        // 触发订阅
+        NotifyCenter.publishEvent(PublisherTypeEnum.firingTask, Event.builder().id(newFilename).build());
+      }
+      
       return ResponseEntity.ok(true);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -76,8 +87,7 @@ public class DiskFileOperateImpl implements FileOperate {
   @Override
   public ResponseEntity verify(String filename) {
     // 表示文件
-    File file = new File(fullProperties.getPublicDir() + File.separator + filename);
-    return ResponseEntity.ok(file.isFile());
+    return ResponseEntity.ok(FileUtils.isFileExist(fullProperties.getPublicDir() + File.separator + filename));
   }
   
   /**
@@ -117,28 +127,16 @@ public class DiskFileOperateImpl implements FileOperate {
   @Override
   public ResponseEntity merge(String baseDir, String filename) {
     baseDir = fullProperties.getTmpDir() + File.separator + baseDir;
-    // 临时 基础目录
-    File baseDirFile = new File(baseDir);
     
     // 读取目录
-    File[] files = baseDirFile.listFiles();
+    File[] files = FileUtils.readDirectoryListing(baseDir);
     // 判断目录是否为空
-    if (files == null || files.length == 0) return ResponseEntity.ok("");
-    
-    // 为了防止文件顺序乱了 这里进行强制排序
-    Arrays.sort(files, new Comparator<File>() {
-      @Override
-      public int compare(File o1, File o2) {
-        String[] p1Arr = o1.getName().split("-"), p2Arr = o2.getName().split("-");
-        int lastP1 = Integer.parseInt(p1Arr[1]), lastP2 = Integer.parseInt(p2Arr[1]);
-        return lastP1 - lastP2;
-      }
-    });
+    if (null == files) return ResponseEntity.ok("");
     
     // 表示合并后的目录
     String mergePublicDir = fullProperties.getPublicDir() + File.separator + filename;
     // 判断是否合并成功
-    boolean mergeFlag = false;
+    boolean mergeFlag;
     try {
       mergeFlag = FileUtils.mergeFile(files, mergePublicDir);
     } catch (IOException e) {
@@ -146,19 +144,48 @@ public class DiskFileOperateImpl implements FileOperate {
     }
     
     // 如果 merge成功后 删除临时文件
-    if (mergeFlag) {
-      // 先删除文件
-      for (File file : files)
-        if (file.isFile()) file.delete();
-      
-      // 删除目录本身
-      try {
-        Files.deleteIfExists(Paths.get(baseDir));
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
+    if (mergeFlag)
+      mergeFlag = FileUtils.deleteIfExists(Paths.get(baseDir).toString());
     
     return ResponseEntity.ok(mergeFlag);
+  }
+  
+  @Override
+  public int partMerge(int readIdx, String filename) {
+    // 转换的path
+    // 其中 filename 是带有文件后缀的 filename
+    String covertPath = FileUtils.joinPath(fullProperties.getConvertDir(), filename + "-" + readIdx);
+    
+    // 原则上 merge的时候 应该有可以merge的东西
+    File[] files = FileUtils.readDirectoryListing(FileUtils.joinPath(fullProperties.getTmpDir(), FileUtils.getNameExcludeExt(filename)));
+    if (null == files) return -1;
+    int newReadIdx = files.length;
+    
+    // 如果长度是一致的话，说明没有东西可以获取
+    if (readIdx == newReadIdx) return readIdx;
+    
+    // 切出了 部分files
+    File[] cutFiles = Arrays.copyOfRange(files, readIdx, files.length);
+    File covertFile = new File(covertPath);
+    
+    // 表示 新的cut files
+    File[] newCutFiles = new File[cutFiles.length + (covertFile.isFile() ? 1 : 0)];
+    if (covertFile.isFile()) {
+      newCutFiles[0] = covertFile;
+      System.arraycopy(cutFiles, 0, newCutFiles, 1, cutFiles.length);
+    } else {
+      newCutFiles = cutFiles;
+    }
+    
+    // 构建新的文件
+    try {
+      FileUtils.mergeFile(newCutFiles, FileUtils.joinPath(fullProperties.getConvertDir(), filename + "-" + newReadIdx));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    
+    // 删除之前合并的文件
+    FileUtils.deleteIfExists(covertPath);
+    return newReadIdx;
   }
 }

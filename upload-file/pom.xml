@@ -12,7 +12,7 @@
   
   <groupId>io.github.a572251465</groupId>
   <artifactId>upload-file-jdk-spring-boot-starter</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
   <name>upload-file-jdk-spring-boot-starter</name>
   <description>upload file springboot middleware</description>
   <url>

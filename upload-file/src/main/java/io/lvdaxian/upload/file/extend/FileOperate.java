@@ -11,4 +11,5 @@ public interface FileOperate {
   ResponseEntity list(String baseDir);
   
   ResponseEntity merge(String baseDir, String filename);
+  int partMerge(int readIdx, String filename);
 }

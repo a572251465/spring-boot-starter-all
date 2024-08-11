@@ -12,3 +12,4 @@ io:
     upload:
       file:
         enabled-type: disk
+        delay-concurrency-merge-time: 1

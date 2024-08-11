@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import io.lvdaxian.upload.file.exception.ParamErrorException;
 import io.lvdaxian.upload.file.utils.Constants;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Arrays;
 
@@ -12,6 +13,7 @@ public class UploadFileFullProperties {
   
   private String baseDir;
   private String tmpDir;
+  private String convertDir;
   private String publicDir;
   private final UploadFileProperties innerProperties;
   
@@ -38,6 +40,14 @@ public class UploadFileFullProperties {
     
     if (StrUtil.isEmpty(properties.getContextPrefix()))
       this.innerProperties.setContextPrefix("");
+    
+    // 设置 延迟并发合并 的时间
+    // 如果时间 <= -1 的话 都设置为1-
+    // 如果为0的话 直接设置默认值
+    if (this.innerProperties.getDelayConcurrencyMergeTime() <= Constants.CONST_QUICKLY_DELAY_CONCURRENCY_MERGE_TIME)
+      this.innerProperties.setDelayConcurrencyMergeTime(Constants.CONST_QUICKLY_DELAY_CONCURRENCY_MERGE_TIME);
+    if (0 == this.innerProperties.getDelayConcurrencyMergeTime())
+      this.innerProperties.setDelayConcurrencyMergeTime(Constants.DEFAULT_DELAY_CONCURRENCY_MERGE_TIME);
   }
   
   public String setBaseDir(String baseDir) {
@@ -46,6 +56,10 @@ public class UploadFileFullProperties {
   
   public String setTmpDir(String tmpDir) {
     return this.tmpDir = tmpDir;
+  }
+  
+  public String setConvertDir(String convertDir) {
+    return this.convertDir = convertDir;
   }
   
   public String setPublicDir(String publicDir) {

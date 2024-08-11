@@ -35,4 +35,9 @@ public class MinoFileOperateImpl implements FileOperate {
   public ResponseEntity merge(String baseDir, String filename) {
     return null;
   }
+  
+  @Override
+  public int partMerge(int readIdx, String filename) {
+    return 0;
+  }
 }

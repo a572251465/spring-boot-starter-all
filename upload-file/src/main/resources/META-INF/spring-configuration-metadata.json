@@ -19,6 +19,11 @@
       "name": "io.lvdaxian.upload.file.context-prefix",
       "type": "java.lang.String",
       "description": "context access prefix"
+    },
+    {
+      "name": "io.lvdaxian.upload.file.delay-concurrency-merge-time",
+      "type": "java.lang.Integer",
+      "description": "delay concurrency merge time"
     }
   ]
 }

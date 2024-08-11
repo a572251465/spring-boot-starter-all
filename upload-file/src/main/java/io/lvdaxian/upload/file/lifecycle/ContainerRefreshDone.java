@@ -32,11 +32,13 @@ public class ContainerRefreshDone implements ApplicationRunner {
     String contextPrefix = fullProperties.getInnerProperties().getContextPrefix(),
         enabledType = fullProperties.getInnerProperties().getEnabledType();
     int httpInterceptorOrder = fullProperties.getInnerProperties().getHttpInterceptorOrder();
+    int delayConcurrencyMergeTime = fullProperties.getInnerProperties().getDelayConcurrencyMergeTime();
     
     log.info(getCommonPrefixAndSuffix("startup successful"));
     log.info(getCommonPrefixAndSuffix(String.format("contextPrefix/ %s", CommonUtils.getValueOrDefault(contextPrefix, "-"))));
     log.info(getCommonPrefixAndSuffix(String.format("enabledType/ %s", enabledType)));
     log.info(getCommonPrefixAndSuffix(String.format("httpInterceptorOrder/ %s", httpInterceptorOrder)));
+    log.info(getCommonPrefixAndSuffix(String.format("delayConcurrencyMergeTime/ %s", delayConcurrencyMergeTime)));
     
     if (StrUtil.equals(enabledType, Constants.ENABLED_TYPE_DISK))
       log.info(getCommonPrefixAndSuffix(String.format("saveDir/ %s", fullProperties.getBaseDir())));

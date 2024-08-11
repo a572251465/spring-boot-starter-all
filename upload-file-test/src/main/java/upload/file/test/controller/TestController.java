@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestController {
   
-  
   @GetMapping("/getFile/{filename}")
   public String getFile(@PathVariable("filename") String filename) {
     return null;
