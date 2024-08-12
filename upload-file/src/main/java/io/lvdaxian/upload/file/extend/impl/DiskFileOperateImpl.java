@@ -205,19 +205,7 @@ public class DiskFileOperateImpl implements FileOperate {
    * @author lihh
    */
   public void mergeSuccessNextHandler(String id, boolean isDeleteTmpFile) {
-    ThreadTask threadTask = ConstVariable.threadTaskMap.get(id);
-    ConstVariable.threadTaskMap.remove(id);
-    ConstVariable.quickStartMapCache.remove(id);
-    // 将等待队列中 元素 删除
-    if (!ConstVariable.waitQueue.isEmpty())
-      ConstVariable.waitQueue.remove(id);
-    
-    // 打断线程
-    Thread thread = ConstVariable.idAndThreadMap.get(id);
-    if (null != thread)
-      thread.interrupt();
-    ConstVariable.idAndThreadMap.remove(id);
-    
+    ThreadTask threadTask = mergeSuccessCleanStatus(id);
     if (isDeleteTmpFile)
       FileUtils.deleteIfExists(FileUtils.joinPath(fullProperties.getTmpDir(), FileUtils.getNameExcludeExt(id)));
     if (null != threadTask) {
