@@ -18,10 +18,12 @@ public class ExecuteMergeTaskImpl implements Runnable {
   private static final Logger log = LoggerFactory.getLogger(ExecuteMergeTaskImpl.class);
   private final String id;
   private final FileOperate fileOperate;
+  private final int threadSleepTime;
   
-  public ExecuteMergeTaskImpl(String id, FileOperate fileOperate) {
+  public ExecuteMergeTaskImpl(String id, FileOperate fileOperate, int threadSleepTime) {
     this.id = id;
     this.fileOperate = fileOperate;
+    this.threadSleepTime = threadSleepTime;
   }
   
   public void executeNextTask() {
@@ -32,6 +34,7 @@ public class ExecuteMergeTaskImpl implements Runnable {
       if (waitQueue.isEmpty()) return;
       
       String nextTaskId = ConstVariable.waitQueue.remove();
+      log.info(io.lvdaxian.upload.file.utils.CommonUtils.getCommonPrefixAndSuffix(String.format("%s exit wait, wait list = %s", nextTaskId, ConstVariable.waitQueue)));
       //  进行下一个任务
       NotifyCenter.publishEvent(PublisherTypeEnum.nextTask, Event.builder().id(nextTaskId).build());
     } finally {
@@ -80,6 +83,8 @@ public class ExecuteMergeTaskImpl implements Runnable {
     // 开始 复制部分 临时文件
     int newReadIdx = this.fileOperate.partMerge(readIdx, this.id);
     currentTask.setReadIndex(newReadIdx);
+    // merge 次数
+    currentTask.setMergeCount(currentTask.getMergeCount() + 1);
     
     if (-1 == newReadIdx) {
       Thread thread = ConstVariable.idAndThreadMap.get(id);
@@ -94,8 +99,12 @@ public class ExecuteMergeTaskImpl implements Runnable {
     
     try {
       for (; ; ) {
-//        Thread.sleep(CommonUtils.calculateThreadSleepTime());
-        Thread.sleep(500);
+        // 如果不是快速开始
+        if (!ConstVariable.quickStartMapCache.getOrDefault(id, false)) {
+          Thread.sleep(CommonUtils.calculateThreadSleepTime(this.threadSleepTime));
+        } else {
+          ConstVariable.quickStartMapCache.remove(id);
+        }
         
         // 正常 or 异常结束执行处理
         normalEndAndInterruptThreadNextProcess(false);

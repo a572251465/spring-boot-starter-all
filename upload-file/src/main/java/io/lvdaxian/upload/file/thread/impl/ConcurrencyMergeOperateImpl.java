@@ -30,6 +30,8 @@ import javax.annotation.Resource;
 public class ConcurrencyMergeOperateImpl implements ConcurrencyMergeOperate {
   
   private static final Logger log = LoggerFactory.getLogger(ConcurrencyMergeOperateImpl.class);
+  // 使用线程执行任务
+  private final BuildThreadFactory threadFactory = BuildThreadFactory.builder().prefix("merge task").build();
   @Resource
   private UploadFileFullProperties fullProperties;
   @Resource
@@ -71,31 +73,44 @@ public class ConcurrencyMergeOperateImpl implements ConcurrencyMergeOperate {
       return;
     }
     
-    // 判断是否有线程还可以执行, 如果已经满的话，直接添加到等待队列中
-    if (ConstVariable.maxThreadCount == ConstVariable.usedThreadCount.get()) {
-      try {
-        ConstVariable.CONST_CONCURRENCY_LOCK.lock();
-        // 双重检测 避免并发
-        if (ConstVariable.maxThreadCount == ConstVariable.usedThreadCount.get())
-          ConstVariable.waitQueue.add(id);
-      } finally {
-        ConstVariable.CONST_CONCURRENCY_LOCK.unlock();
-      }
-      return;
-    }
-    
-    // 使用线程执行任务
-    BuildThreadFactory threadFactory = BuildThreadFactory.builder().prefix("merge task").build();
     // 线程个数 添加
     ConstVariable.usedThreadCount.getAndIncrement();
-    Thread thread = threadFactory.newThread(new ExecuteMergeTaskImpl(id, fileOperate));
+    log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("%s join success, used/max = %s/%s, wait=%s", id, ConstVariable.usedThreadCount.get(), ConstVariable.maxThreadCount, ConstVariable.waitQueue)));
+    Thread thread = threadFactory.newThread(new ExecuteMergeTaskImpl(id, fileOperate, fullProperties.getInnerProperties().getThreadSleepTime()));
     ConstVariable.idAndThreadMap.put(id, thread);
     thread.start();
   }
   
   @Override
   public void firingTask(String id) {
+    // 如果想要加入队列中，currentTask 一定是 null
     ThreadTask currentTask = ConstVariable.threadTaskMap.get(id);
+    
+    // 判断是否有线程还可以执行, 如果已经满的话，直接添加到等待队列中
+    if (
+        ConstVariable.maxThreadCount == ConstVariable.usedThreadCount.get() &&
+            !ConstVariable.waitQueue.contains(id) &&
+            null == currentTask
+    ) {
+      try {
+        ConstVariable.CONST_CONCURRENCY_LOCK.lock();
+        // 双重检测 避免并发
+        if (
+            ConstVariable.maxThreadCount == ConstVariable.usedThreadCount.get() &&
+                !ConstVariable.waitQueue.contains(id)
+        ) {
+          ConstVariable.waitQueue.add(id);
+          log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("%s join wait queue. wait list = %s", id, ConstVariable.waitQueue)));
+          return;
+        }
+      } finally {
+        ConstVariable.CONST_CONCURRENCY_LOCK.unlock();
+      }
+    }
+    
+    // 判断是否在等待队列中
+    if (ConstVariable.waitQueue.contains(id))
+      return;
     
     // 如果没有task的话 肯定是第一次执行
     if (null == currentTask) {
@@ -108,7 +123,7 @@ public class ConcurrencyMergeOperateImpl implements ConcurrencyMergeOperate {
       
       // 是否立马开始
       boolean isFastStart = Constants.CONST_QUICKLY_DELAY_CONCURRENCY_MERGE_TIME == fullProperties.getInnerProperties().getDelayConcurrencyMergeTime();
-      if (isFastStart)
+      if (isFastStart || ConstVariable.quickStartMapCache.getOrDefault(id, false))
         baseTask.setMergeType(ThreadMergeEnum.MERGE);
       
       // 添加缓存
@@ -133,10 +148,5 @@ public class ConcurrencyMergeOperateImpl implements ConcurrencyMergeOperate {
     
     currentTask.setMergeType(ThreadMergeEnum.MERGE);
     executeTask(id);
-  }
-  
-  @Override
-  public boolean isMergeComplete(String id) {
-    return false;
   }
 }

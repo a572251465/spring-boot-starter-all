@@ -11,6 +11,11 @@
       "description": "when enabled.type is file, please input save.dir"
     },
     {
+      "name": "io.lvdaxian.upload.file.enabled-logger",
+      "type": "java.lang.Boolean",
+      "description": "do you want to enable logger"
+    },
+    {
       "name": "io.lvdaxian.upload.file.http-interceptor-order",
       "type": "java.lang.Integer",
       "description": "setting http interceptor order"
@@ -24,6 +29,11 @@
       "name": "io.lvdaxian.upload.file.delay-concurrency-merge-time",
       "type": "java.lang.Integer",
       "description": "delay concurrency merge time"
+    },
+    {
+      "name": "io.lvdaxian.upload.file.thread-sleep-time",
+      "type": "java.lang.Integer",
+      "description": "thread sleep time, to wait for more files to be uploaded"
     }
   ]
 }

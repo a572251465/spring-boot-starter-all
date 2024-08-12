@@ -13,7 +13,7 @@ public class CommonUtils {
    * @return 返回睡眠的时间
    * @author lihh
    */
-  public static int calculateThreadSleepTime() {
-    return (ConstVariable.BASE_THREAD_SLEEP_TIME + (int) (ConstVariable.usedThreadCount.get() * 0.5)) * 1000;
+  public static int calculateThreadSleepTime(int baseSleepTime) {
+    return (baseSleepTime + (int) (ConstVariable.usedThreadCount.get() * 0.5)) * 1000;
   }
 }

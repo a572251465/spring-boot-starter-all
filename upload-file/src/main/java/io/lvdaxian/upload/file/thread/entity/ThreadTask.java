@@ -18,4 +18,6 @@ public class ThreadTask implements Serializable {
   private ThreadMergeEnum mergeType;
   // 表示 读取文件的索引
   private int readIndex;
+  // 表示 merge 次数
+  private int mergeCount;
 }

@@ -2,6 +2,7 @@ package io.lvdaxian.upload.file.entity;
 
 import cn.hutool.core.util.StrUtil;
 import io.lvdaxian.upload.file.exception.ParamErrorException;
+import io.lvdaxian.upload.file.thread.utils.ConstVariable;
 import io.lvdaxian.upload.file.utils.Constants;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,6 +49,11 @@ public class UploadFileFullProperties {
       this.innerProperties.setDelayConcurrencyMergeTime(Constants.CONST_QUICKLY_DELAY_CONCURRENCY_MERGE_TIME);
     if (0 == this.innerProperties.getDelayConcurrencyMergeTime())
       this.innerProperties.setDelayConcurrencyMergeTime(Constants.DEFAULT_DELAY_CONCURRENCY_MERGE_TIME);
+    
+    // 设置判断 线程睡眠的时间
+    int threadSleepTime = this.innerProperties.getThreadSleepTime();
+    if (threadSleepTime <= 0)
+      this.innerProperties.setThreadSleepTime(ConstVariable.BASE_THREAD_SLEEP_TIME);
   }
   
   public String setBaseDir(String baseDir) {

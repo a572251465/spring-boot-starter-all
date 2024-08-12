@@ -13,3 +13,4 @@ io:
       file:
         enabled-type: disk
         delay-concurrency-merge-time: 1
+        thread-sleep-time: 1

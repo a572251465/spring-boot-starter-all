@@ -1,15 +1,19 @@
 package io.lvdaxian.upload.file.extend.impl;
 
-import cn.hutool.core.io.FileUtil;
 import io.lvdaxian.upload.file.entity.UploadFileFullProperties;
 import io.lvdaxian.upload.file.extend.FileOperate;
 import io.lvdaxian.upload.file.notify.NotifyCenter;
 import io.lvdaxian.upload.file.notify.entity.Event;
 import io.lvdaxian.upload.file.notify.enumeration.PublisherTypeEnum;
+import io.lvdaxian.upload.file.thread.entity.ThreadTask;
+import io.lvdaxian.upload.file.thread.enumeration.ThreadMergeEnum;
+import io.lvdaxian.upload.file.thread.utils.ConstVariable;
 import io.lvdaxian.upload.file.utils.CommonUtils;
 import io.lvdaxian.upload.file.utils.Constants;
 import io.lvdaxian.upload.file.utils.FileUtils;
 import io.lvdaxian.upload.file.utils.result.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +22,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
@@ -26,6 +32,7 @@ import java.util.Optional;
 @ConditionalOnProperty(name = "io.lvdaxian.upload.file.enabled-type", havingValue = "disk")
 public class DiskFileOperateImpl implements FileOperate {
   
+  private static final Logger log = LoggerFactory.getLogger(DiskFileOperateImpl.class);
   @Resource
   private UploadFileFullProperties fullProperties;
   
@@ -87,7 +94,7 @@ public class DiskFileOperateImpl implements FileOperate {
   @Override
   public ResponseEntity verify(String filename) {
     // 表示文件
-    return ResponseEntity.ok(FileUtils.isFileExist(fullProperties.getPublicDir() + File.separator + filename));
+    return ResponseEntity.ok(FileUtils.isFileExist(FileUtils.joinPath(fullProperties.getPublicDir(), filename)));
   }
   
   /**
@@ -113,7 +120,110 @@ public class DiskFileOperateImpl implements FileOperate {
     // 统计文件 字节大小
     for (String fileName : list)
       fileSize += new File(basePathFile + File.separator + fileName).length();
+    
+    // 断点续传的方式下 清空中间状态
+    if (list.length > 0) {
+      String id = list[0].split("-")[0];
+      
+      ThreadTask threadTask = ConstVariable.threadTaskMap.get(id);
+      if (null != threadTask)
+        mergeSuccessNextHandler(id, false);
+      
+      // 标记 快速开始
+      ConstVariable.quickStartMapCache.put(id, true);
+    }
+    
     return ResponseEntity.ok(Arrays.asList(list.length, fileSize));
+  }
+  
+  /**
+   * 表示 merge 的扩展功能
+   *
+   * @param id 指的是文件名
+   * @author lihh
+   */
+  public boolean mergeExtend(String id) {
+    ThreadTask threadTask = ConstVariable.threadTaskMap.get(id);
+    // 异常 情况, 有可能是线程饥饿导致的（一直等待中，而切片文件已经上传成功了）
+    if (null == threadTask) return false;
+    
+    ThreadMergeEnum mergeType = threadTask.getMergeType();
+    int readIndex = threadTask.getReadIndex();
+    
+    // 如果读取到的索引是 -1 的话，属于非正常情况
+    // 如果thread状态 是MERGE的话，正常运行中
+    // 如果thread状态 是NotStarted的话，还在时间计算过程中
+    if (
+        !Arrays.asList(ThreadMergeEnum.MERGE, ThreadMergeEnum.NotStarted).contains(mergeType) ||
+            -1 == readIndex
+    ) {
+      log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("%s merge success, finish state is %s", id, mergeType.getType())));
+      return false;
+    }
+    
+    String filenameExcludeExt = FileUtils.getNameExcludeExt(id);
+    // 如果能执行到这里，最起码是按照正常流程执行的
+    File[] files = FileUtils.readDirectoryListing(
+        FileUtils.joinPath(fullProperties.getTmpDir(), filenameExcludeExt)
+    );
+    if (null == files) return false;
+    
+    // 满足此条件的话，说明最后还没收尾，再次调用后进行收尾
+    if (readIndex != files.length) {
+      readIndex = partMerge(readIndex, id);
+      threadTask.setMergeCount(threadTask.getMergeCount() + 1);
+    }
+    threadTask.setReadIndex(readIndex);
+    
+    // 再次读了一次，读了最后一次 还不到的话，说明是未知的异常情况
+    if (readIndex != files.length)
+      return false;
+    
+    // 文件复制
+    String covertPath = FileUtils.joinPath(fullProperties.getConvertDir(), id + "-" + readIndex);
+    String publicPath = FileUtils.joinPath(fullProperties.getPublicDir(), id);
+    
+    if (!FileUtils.isFileExist(covertPath))
+      return false;
+    try {
+      Files.copy(Path.of(covertPath), Path.of(publicPath));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    
+    // 复制成功后 删除原来的文件
+    FileUtils.deleteIfExists(covertPath);
+    log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("%s merge success, merge count is: %s", id, threadTask.getMergeCount())));
+    return true;
+  }
+  
+  /**
+   * merge 成功后的处理
+   *
+   * @param id              文件名称
+   * @param isDeleteTmpFile 是否临时文件
+   * @author lihh
+   */
+  public void mergeSuccessNextHandler(String id, boolean isDeleteTmpFile) {
+    ThreadTask threadTask = ConstVariable.threadTaskMap.get(id);
+    ConstVariable.threadTaskMap.remove(id);
+    ConstVariable.quickStartMapCache.remove(id);
+    // 将等待队列中 元素 删除
+    if (!ConstVariable.waitQueue.isEmpty())
+      ConstVariable.waitQueue.remove(id);
+    
+    // 打断线程
+    Thread thread = ConstVariable.idAndThreadMap.get(id);
+    if (null != thread)
+      thread.interrupt();
+    ConstVariable.idAndThreadMap.remove(id);
+    
+    if (isDeleteTmpFile)
+      FileUtils.deleteIfExists(FileUtils.joinPath(fullProperties.getTmpDir(), FileUtils.getNameExcludeExt(id)));
+    if (null != threadTask) {
+      int readIndex = threadTask.getReadIndex();
+      FileUtils.deleteIfExists(FileUtils.joinPath(fullProperties.getConvertDir(), id + "-" + readIndex));
+    }
   }
   
   /**
@@ -126,12 +236,17 @@ public class DiskFileOperateImpl implements FileOperate {
    */
   @Override
   public ResponseEntity merge(String baseDir, String filename) {
-    baseDir = fullProperties.getTmpDir() + File.separator + baseDir;
-    
+    baseDir = FileUtils.joinPath(fullProperties.getTmpDir(), baseDir);
     // 读取目录
     File[] files = FileUtils.readDirectoryListing(baseDir);
     // 判断目录是否为空
     if (null == files) return ResponseEntity.ok("");
+    
+    // 进行 merge extend
+    if (mergeExtend(filename)) {
+      mergeSuccessNextHandler(filename, true);
+      return ResponseEntity.ok(true);
+    }
     
     // 表示合并后的目录
     String mergePublicDir = fullProperties.getPublicDir() + File.separator + filename;
@@ -145,8 +260,12 @@ public class DiskFileOperateImpl implements FileOperate {
     
     // 如果 merge成功后 删除临时文件
     if (mergeFlag)
-      mergeFlag = FileUtils.deleteIfExists(Paths.get(baseDir).toString());
+      FileUtils.deleteIfExists(Paths.get(baseDir).toString());
     
+    // 清空状态
+    if (ConstVariable.waitQueue.contains(filename))
+      log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("%s in wait queue, auto merge", filename)));
+    mergeSuccessNextHandler(filename, true);
     return ResponseEntity.ok(mergeFlag);
   }
   

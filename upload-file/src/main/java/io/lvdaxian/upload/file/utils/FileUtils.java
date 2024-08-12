@@ -41,8 +41,7 @@ public class FileUtils {
     int idx = filename.length() - 1;
     for (; idx >= 0; idx -= 1) {
       char c = filename.charAt(idx);
-      if ('.' == c)
-        break;
+      if ('.' == c) break;
     }
     
     return -1 == idx ? filename : filename.substring(0, idx);
@@ -52,26 +51,44 @@ public class FileUtils {
    * 删除存在的目录 以及文件
    *
    * @param fileOrDirPath 文件或是目的地址
-   * @return boolean 是否删除成功
    * @author lihh
    */
-  public static boolean deleteIfExists(String fileOrDirPath) {
+  public static void deleteIfExists(String fileOrDirPath) {
     File file = new File(fileOrDirPath);
     
-    if (!file.exists())
-      return false;
+    if (!file.exists()) return;
     
-    if (file.isFile())
-      file.delete();
+    if (file.isFile()) file.delete();
     else {
       File[] files = file.listFiles();
+      if (null == files) return;
       
-      if (files != null)
-        Arrays.stream(files).forEach(File::delete);
+      for (File fileItem : files) {
+        if (fileItem.isDirectory())
+          deleteIfExists(fileItem.getPath());
+        fileItem.delete();
+      }
       
       file.delete();
     }
-    return true;
+  }
+  
+  /**
+   * 删除目录列表，只删除列表，不包括目录本身
+   *
+   * @param dirPath 目录地址
+   * @author lihh
+   */
+  public static void deleteDirectoryListing(String dirPath) {
+    File file = new File(dirPath);
+    
+    if (!file.exists() || !file.isDirectory()) return;
+    
+    File[] files = file.listFiles();
+    if (null == files) return;
+    
+    for (File item : files)
+      item.delete();
   }
   
   /**
@@ -86,10 +103,8 @@ public class FileUtils {
     
     List<String> pathList = Arrays.stream(paths).map(path -> {
       
-      if (path.startsWith("/"))
-        path = path.replaceAll("^/+", "");
-      if (path.endsWith("/"))
-        path = path.replaceAll("/+$", "");
+      if (path.startsWith("/")) path = path.replaceAll("^/+", "");
+      if (path.endsWith("/")) path = path.replaceAll("/+$", "");
       
       return path;
     }).collect(Collectors.toList());

@@ -10,5 +10,7 @@ public class UploadFileProperties {
   private String saveDir;
   private int httpInterceptorOrder;
   private String contextPrefix;
+  private boolean enabledLogger;
   private int delayConcurrencyMergeTime;
+  private int threadSleepTime;
 }

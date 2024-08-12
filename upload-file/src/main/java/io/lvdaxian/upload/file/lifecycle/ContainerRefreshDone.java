@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import io.lvdaxian.upload.file.entity.UploadFileFullProperties;
 import io.lvdaxian.upload.file.utils.CommonUtils;
 import io.lvdaxian.upload.file.utils.Constants;
+import io.lvdaxian.upload.file.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -33,14 +34,18 @@ public class ContainerRefreshDone implements ApplicationRunner {
         enabledType = fullProperties.getInnerProperties().getEnabledType();
     int httpInterceptorOrder = fullProperties.getInnerProperties().getHttpInterceptorOrder();
     int delayConcurrencyMergeTime = fullProperties.getInnerProperties().getDelayConcurrencyMergeTime();
+    int threadSleepTime = fullProperties.getInnerProperties().getThreadSleepTime();
     
     log.info(getCommonPrefixAndSuffix("startup successful"));
     log.info(getCommonPrefixAndSuffix(String.format("contextPrefix/ %s", CommonUtils.getValueOrDefault(contextPrefix, "-"))));
     log.info(getCommonPrefixAndSuffix(String.format("enabledType/ %s", enabledType)));
     log.info(getCommonPrefixAndSuffix(String.format("httpInterceptorOrder/ %s", httpInterceptorOrder)));
     log.info(getCommonPrefixAndSuffix(String.format("delayConcurrencyMergeTime/ %s", delayConcurrencyMergeTime)));
+    log.info(getCommonPrefixAndSuffix(String.format("threadSleepTime/ %s", threadSleepTime)));
     
-    if (StrUtil.equals(enabledType, Constants.ENABLED_TYPE_DISK))
+    if (StrUtil.equals(enabledType, Constants.ENABLED_TYPE_DISK)) {
       log.info(getCommonPrefixAndSuffix(String.format("saveDir/ %s", fullProperties.getBaseDir())));
+      FileUtils.deleteDirectoryListing(FileUtils.joinPath(fullProperties.getConvertDir()));
+    }
   }
 }
