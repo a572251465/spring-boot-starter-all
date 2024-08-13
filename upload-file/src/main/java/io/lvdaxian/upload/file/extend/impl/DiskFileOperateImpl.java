@@ -51,6 +51,16 @@ public class DiskFileOperateImpl implements FileOperate {
   }
   
   /**
+   * 是否启动 并发merge
+   *
+   * @author lihh
+   * @return 启动状态
+   */
+  public boolean isEnabledConcurrencyMerge() {
+    return fullProperties.getInnerProperties().isEnabledConcurrencyMerge();
+  }
+  
+  /**
    * 文件 分片上传的逻辑
    *
    * @param file     上传的文件
@@ -72,7 +82,7 @@ public class DiskFileOperateImpl implements FileOperate {
     try {
       FileUtils.writeFile(filePath, file.getInputStream());
       
-      if (!filename.startsWith("not_del_file")) {
+      if (isEnabledConcurrencyMerge() && !filename.startsWith("not_del_file")) {
         String newFilename = filename.split("-")[0];
         // 触发订阅
         NotifyCenter.publishEvent(PublisherTypeEnum.firingTask, Event.builder().id(newFilename).build());
@@ -122,7 +132,7 @@ public class DiskFileOperateImpl implements FileOperate {
       fileSize += new File(basePathFile + File.separator + fileName).length();
     
     // 断点续传的方式下 清空中间状态
-    if (list.length > 0) {
+    if (isEnabledConcurrencyMerge() && list.length > 0) {
       String id = list[0].split("-")[0];
       
       ThreadTask threadTask = ConstVariable.threadTaskMap.get(id);
@@ -224,15 +234,20 @@ public class DiskFileOperateImpl implements FileOperate {
    */
   @Override
   public ResponseEntity merge(String baseDir, String filename) {
+    // merge 开始时间
+    long mergeStartTime = System.currentTimeMillis();
+    
     baseDir = FileUtils.joinPath(fullProperties.getTmpDir(), baseDir);
     // 读取目录
     File[] files = FileUtils.readDirectoryListing(baseDir);
     // 判断目录是否为空
     if (null == files) return ResponseEntity.ok("");
     
+    // 启动  并发merge
     // 进行 merge extend
-    if (mergeExtend(filename)) {
+    if (isEnabledConcurrencyMerge() && mergeExtend(filename)) {
       mergeSuccessNextHandler(filename, true);
+      log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("merge cost time is: %s", System.currentTimeMillis() - mergeStartTime)));
       return ResponseEntity.ok(true);
     }
     
@@ -251,9 +266,11 @@ public class DiskFileOperateImpl implements FileOperate {
       FileUtils.deleteIfExists(Paths.get(baseDir).toString());
     
     // 清空状态
-    if (ConstVariable.waitQueue.contains(filename))
+    if (isEnabledConcurrencyMerge() && ConstVariable.waitQueue.contains(filename))
       log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("%s in wait queue, auto merge", filename)));
     mergeSuccessNextHandler(filename, true);
+    
+    log.info(CommonUtils.getCommonPrefixAndSuffix(String.format("merge cost time is: %s", System.currentTimeMillis() - mergeStartTime)));
     return ResponseEntity.ok(mergeFlag);
   }
   

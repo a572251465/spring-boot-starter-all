@@ -40,8 +40,12 @@ public class ContainerRefreshDone implements ApplicationRunner {
     log.info(getCommonPrefixAndSuffix(String.format("contextPrefix/ %s", CommonUtils.getValueOrDefault(contextPrefix, "-"))));
     log.info(getCommonPrefixAndSuffix(String.format("enabledType/ %s", enabledType)));
     log.info(getCommonPrefixAndSuffix(String.format("httpInterceptorOrder/ %s", httpInterceptorOrder)));
-    log.info(getCommonPrefixAndSuffix(String.format("delayConcurrencyMergeTime/ %s", delayConcurrencyMergeTime)));
-    log.info(getCommonPrefixAndSuffix(String.format("threadSleepTime/ %s", threadSleepTime)));
+    
+    if (fullProperties.getInnerProperties().isEnabledConcurrencyMerge()) {
+      log.info(getCommonPrefixAndSuffix("concurrency merge start ~~~"));
+      log.info(getCommonPrefixAndSuffix(String.format("delayConcurrencyMergeTime/ %s", delayConcurrencyMergeTime)));
+      log.info(getCommonPrefixAndSuffix(String.format("threadSleepTime/ %s", threadSleepTime)));
+    }
     
     if (StrUtil.equals(enabledType, Constants.ENABLED_TYPE_DISK)) {
       log.info(getCommonPrefixAndSuffix(String.format("saveDir/ %s", fullProperties.getBaseDir())));

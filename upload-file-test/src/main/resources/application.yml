@@ -12,5 +12,6 @@ io:
     upload:
       file:
         enabled-type: disk
-        delay-concurrency-merge-time: 1
-        thread-sleep-time: 1
+        delay-concurrency-merge-time: 5
+        thread-sleep-time: 6
+        enabled-concurrency-merge: true

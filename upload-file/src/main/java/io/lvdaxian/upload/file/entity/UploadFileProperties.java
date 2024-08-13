@@ -13,4 +13,5 @@ public class UploadFileProperties {
   private boolean enabledLogger;
   private int delayConcurrencyMergeTime;
   private int threadSleepTime;
+  private boolean enabledConcurrencyMerge;
 }

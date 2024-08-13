@@ -26,6 +26,11 @@
       "description": "context access prefix"
     },
     {
+      "name": "io.lvdaxian.upload.file.enabled-concurrency-merge",
+      "type": "java.lang.Boolean",
+      "description": "do you want to enable concurrency merge"
+    },
+    {
       "name": "io.lvdaxian.upload.file.delay-concurrency-merge-time",
       "type": "java.lang.Integer",
       "description": "delay concurrency merge time"

@@ -25,5 +25,5 @@ public class ConstVariable {
   // 表示 是否快速启动
   public final static ConcurrentMap<String, Boolean> quickStartMapCache = new ConcurrentHashMap<>();
   // 表示 基础 sleep 时间, 以 秒 为单位, 尽可能的拉长时间 这样的话 可能减少IO操作
-  public final static int BASE_THREAD_SLEEP_TIME = 7;
+  public final static int BASE_THREAD_SLEEP_TIME = 5;
 }
